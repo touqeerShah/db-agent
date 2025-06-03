@@ -1,0 +1,37 @@
+version: "3.5"
+
+services:
+ 
+  postgresdb:
+    image: postgres:14
+    container_name: ai-postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ai
+      POSTGRES_PASSWORD: YWkxMjM0NTY3ODk=
+      POSTGRES_DB: ai
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime
+
+
+  llm-mongodb:
+    # build: ./mongodb
+    image: mongo:latest
+    container_name: llm-mongodb
+    command: mongod --auth
+    ports:
+      - 37017:27017
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: llm
+      MONGO_INITDB_ROOT_USERNAME: llm
+      MONGO_INITDB_DATABASE: aduit
+      MONGO_USERNAME: llm
+      MONGO_PASSWORD: llm
+      MONGO_DATABASE: llm
+    volumes:
+     - /etc/localtime:/etc/localtime
+     - ./mongodb/db:/data/db      
+

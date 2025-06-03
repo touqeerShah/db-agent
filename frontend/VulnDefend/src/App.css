@@ -1,0 +1,75 @@
+/* General login container styling */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  text-align: center;
+  background-color: black;
+  color: #2dcbcb;
+  min-height: 100vh;
+}
+
+/* Title styling */
+.login-container h2 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #2dcbcb;
+}
+
+/* Description styling */
+.login-container p {
+  font-size: 18px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 400;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* Google Sign-In button styling */
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: black;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.google-icon {
+  margin-right: 10px;
+}
+
+.google-signin-btn:hover {
+  background-color: #f1f1f1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .login-container h2 {
+    font-size: 28px;
+  }
+
+  .login-container p {
+    font-size: 16px;
+  }
+
+  .google-signin-btn {
+    font-size: 14px;
+  }
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 10px;
+}

@@ -1,0 +1,190 @@
+/* General styles for the team section */
+.Team-header {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: black;
+  color: #2dcbcb;
+}
+
+.Team-header h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #2dcbcb;
+}
+
+.Team-header p {
+  font-size: 18px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 400;
+  color: white;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.mb-4{
+  color: black;
+}
+/* Main team section */
+.ezy__team8 {
+  display: flex;  /* Use Flexbox */
+  justify-content: center;  /* Horizontally center content */
+  align-items: center;  /* Vertically center content */
+  /* height: 100vh;  Full viewport height to center vertically */
+  background-color: black;  /* Background color */
+  overflow: hidden;
+  padding: 50px;
+}
+
+.ezy__team8-list {
+  display: flex;
+  flex-direction: column;  /* Ensure items are stacked vertically */
+  justify-content: center;  /* Center items vertically */
+  align-items: center;  /* Center items horizontally */
+  width: 100%;
+  max-width: 1200px;  /* Set a maximum width */
+  padding: 30px;
+  background-color: #f8f8f8; /* Optional: Add a background color */
+  border-radius: 12px;
+}
+
+.team-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.team-col {
+  flex: 1;
+  padding: 15px;
+}
+
+.team-image {
+  display: flex;
+  justify-content: center;
+}
+
+.ezy__team8-bg-holder {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* min-height: 400px; */
+  width: 100%;
+  border-radius: 15px;
+}
+
+.team-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ezy__team8-content h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.ezy__team8-content p {
+  margin-bottom: 20px;
+  color: black;
+}
+
+.ezy__team8-description {
+  color: #666;
+}
+
+.ezy__team8-social-links a {
+  font-size: 20px;
+  margin-right: 15px;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.ezy__team8-social-links a:hover {
+  color: #555;
+}
+
+/* Navigation control buttons */
+.ezy__team8-control {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.ezy__team8-control-prev,
+.ezy__team8-control-next {
+  font-size: 20px;
+  background-color: #2dcbcb;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ezy__team8-control-prev:hover,
+.ezy__team8-control-next:hover {
+  background-color: #555;
+}
+
+/* Adjust the main team section for smaller screens */
+@media (max-width: 768px) {
+  .team-row {
+    flex-direction: column;
+    align-items: center; /* Center-align the column contents */
+  }
+
+  .team-col {
+    max-width: 100%;
+    flex-basis: 100%;
+    text-align: center; /* Center-align text in each column */
+  }
+
+  /* Make the image circular and smaller */
+  .team-image .ezy__team8-bg-holder {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%; /* Make the image circular */
+    width: 100px; /* Smaller width */
+    height: 100px; /* Smaller height */
+    margin: 0 auto; /* Center the image */
+  }
+
+  /* Adjust the content margins */
+  .team-content h1 {
+    font-size: 24px;
+  }
+
+  .team-content p {
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+  .team-image .ezy__team8-bg-holder {
+    width: 100px; /* Even smaller width */
+    height: 100px; /* Even smaller height */
+  }
+
+  .team-content h1 {
+    font-size: 20px;
+  }
+
+  .team-content p {
+    font-size: 14px;
+  }
+
+  .ezy__team8-social-links a {
+    font-size: 18px; /* Adjust icon size */
+    margin-right: 10px;
+  }
+}

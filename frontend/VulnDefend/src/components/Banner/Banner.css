@@ -1,0 +1,231 @@
+/* General Styles */
+.banner-outer-container {
+  background-color: #fff;
+}
+
+.banner-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 50px;
+  background-color: #fff;
+  color: #000;
+  flex-wrap: wrap;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 100px;
+  padding-right: 100px;
+}
+
+/* Left and Right sections */
+.left-section,
+.right-section {
+  width: 50%;
+}
+
+.left-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.right-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography */
+.heading .sub-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.33em;
+  color: #2dcbcb;
+}
+
+.main-heading h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 86px;
+  font-weight: 600;
+  line-height: 92px;
+  color: #000;
+}
+
+.main-heading span {
+  letter-spacing: 0.1em;
+  color: #2dcbcb;
+}
+
+.description p {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+}
+
+.spacer {
+  margin: 20px 0;
+}
+
+/* Email Form */
+.email-form {
+  display: flex;
+  width: 100%;
+  position: relative;
+  align-items: center; /* Center-aligns the input and button */
+}
+
+.email-input {
+  width: calc(100% - 150px); /* Adjust width to accommodate button */
+  padding: 20px 25px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  background: rgba(45, 203, 203, 0.1);
+  color: #000;
+  border: 1px solid rgba(45, 203, 203, 0.6);
+  outline: none;
+}
+
+.submit-button-container {
+  display: flex;
+  justify-content: center; /* Centers the button */
+  align-items: center;
+  width: 138px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 50px;
+  background: #2dcbcb;
+  font-size: 20px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+}
+.image-container {
+  width: 100%;
+  max-width: 512px;
+}
+
+.banner-image {
+  width: 100%;
+  object-fit: contain;
+  object-position: center top;
+  border-radius: inherit;
+}
+
+/* Responsive Styles */
+
+/* For screens smaller than 1024px */
+@media (max-width: 1024px) {
+  .banner-container {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  .main-heading h1 {
+    font-size: 72px;
+    line-height: 80px;
+  }
+
+  .description p {
+    font-size: 16px;
+  }
+}
+
+/* For screens smaller than 768px */
+@media (max-width: 768px) {
+  .banner-container {
+    flex-direction: column;
+    padding: 30px;
+  }
+
+  .left-section,
+  .right-section {
+    width: 100%;
+  }
+
+  .main-heading h1 {
+    font-size: 60px;
+    line-height: 70px;
+  }
+
+  .description p {
+    font-size: 14px;
+  }
+
+  .email-input {
+    font-size: 14px;
+    padding: 15px 20px;
+  }
+
+  .submit-button {
+    font-size: 18px;
+    width: 120px;
+  }
+}
+
+/* For screens smaller than 576px */
+@media (max-width: 576px) {
+  .banner-container {
+    padding: 20px;
+  }
+
+  .main-heading h1 {
+    font-size: 48px;
+    line-height: 60px;
+  }
+
+  .description p {
+    font-size: 12px;
+  }
+
+  .email-input {
+    font-size: 12px;
+    padding: 10px 15px;
+  }
+
+  .submit-button {
+    font-size: 16px;
+    width: 110px;
+  }
+}
+
+/* For screens smaller than 400px */
+@media (max-width: 400px) {
+  .main-heading h1 {
+    font-size: 36px;
+    line-height: 48px;
+    text-align: center;
+  }
+
+  .description p {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .email-input {
+    font-size: 10px;
+    padding: 8px 12px;
+  }
+
+  .submit-button {
+    font-size: 14px;
+    width: 100px;
+  }
+
+  .banner-container {
+    padding: 15px;
+  }
+}

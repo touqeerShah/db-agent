@@ -1,0 +1,93 @@
+/* General Features Section Styling */
+.features-section {
+  text-align: center;
+  padding: 20px;
+  padding-left: 60px; /* Extra space on the left */
+  padding-right: 60px; /* Extra space on the right */
+  background-color: #ffffff;
+  color: #2dcbcb;
+  max-width: 1400px; /* Control maximum width */
+  margin: 0 auto; /* Center align the section */
+}
+
+.features-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 70px;
+}
+
+.features-description {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  color: black;
+  line-height: 24.9px;
+  margin-bottom: 20px;
+}
+
+.features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* Responsive Design */
+
+/* For screens smaller than 1200px */
+@media (max-width: 1200px) {
+  .features-section {
+    padding-left: 80px; /* Reduce side padding for smaller screens */
+    padding-right: 80px;
+  }
+
+  .features-title {
+    font-size: 36px;
+  }
+
+  .features-description {
+    font-size: 13px;
+  }
+}
+
+/* For screens smaller than 768px (tablets) */
+@media (max-width: 768px) {
+  .features-section {
+    padding-left: 50px; /* Further reduce padding for tablets */
+    padding-right: 50px;
+  }
+
+  .features-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .features-title {
+    font-size: 32px;
+    line-height: 50px;
+  }
+
+  .features-description {
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+}
+
+/* For screens smaller than 480px (large smartphones) */
+@media (max-width: 480px) {
+  .features-section {
+    padding-left: 20px; /* Smallest padding for smartphones */
+    padding-right: 20px;
+  }
+
+  .features-title {
+    font-size: 28px;
+    line-height: 40px;
+  }
+
+  .features-description {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+}

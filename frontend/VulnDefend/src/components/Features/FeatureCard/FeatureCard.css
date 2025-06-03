@@ -1,0 +1,137 @@
+/* Feature Card Styling */
+.feature-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 4px solid #2dcbcb;
+  width: 100%;
+  max-width: 350px; /* Limit max width for large screens */
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: black;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  padding: 20px;
+  margin: 10px auto; /* Center-align and add spacing */
+}
+
+.feature-card:hover {
+  transform: scale(1.05); /* Hover effect */
+}
+
+.feature-card-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.feature-icon-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-icon-wrapper {
+  width: 80px; /* Icon size */
+  height: 80px;
+}
+
+.feature-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.feature-card h3 {
+  font-family: 'Geologica', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.45px;
+  line-height: 28px;
+  color: #2dcbcb;
+  margin: 0;
+}
+
+/* Partition line between title and description */
+.feature-partition {
+  height: 2px;
+  background-color: #2dcbcb;
+  margin: 10px 0;
+}
+
+.feature-text-container {
+  padding: 10px;
+  text-align: center;
+}
+
+.feature-text-container p {
+  font-family: 'Geologica', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+
+/* Responsive Design */
+
+/* For larger tablets and smaller desktops */
+@media (max-width: 1024px) {
+  .feature-card {
+    max-width: 90%; /* Reduce width slightly */
+    margin-bottom: 20px;
+  }
+
+  .feature-icon-wrapper {
+    width: 70px;
+    height: 70px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .feature-text-container p {
+    font-size: 0.95rem;
+  }
+}
+
+/* For smaller tablets */
+@media (max-width: 768px) {
+  .feature-card {
+    max-width: 80%; /* Adjust width for smaller tablets */
+  }
+
+  .feature-icon-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.05rem;
+  }
+
+  .feature-text-container p {
+    font-size: 0.9rem;
+  }
+}
+
+/* For mobile devices */
+@media (max-width: 480px) {
+  .feature-card {
+    max-width: 80%; /* Full width for mobile devices */
+  }
+
+  .feature-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .feature-card h3 {
+    font-size: 1rem;
+  }
+
+  .feature-text-container p {
+    font-size: 0.85rem;
+  }
+}

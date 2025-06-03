@@ -1,0 +1,89 @@
+@keyframes slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.tools {
+  overflow: hidden;
+  padding: 60px 0;
+  background: white;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.tools-slide {
+  display: flex;
+  animation: 35s slide infinite linear;
+  padding-left: 20px;
+}
+
+.tools-slide img {
+  height: 50px;
+  margin-left: 20px;
+}
+
+.tools:before,
+.tools:after {
+  position: absolute;
+  top: 0;
+  width: 100px;
+  height: 100%;
+  content: "";
+  z-index: 2;
+}
+
+.tools:before {
+  left: 0;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0), white);
+}
+
+.tools:after {
+  right: 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), white);
+}
+
+.tools.double-slide {
+  display: flex;
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .tools-slide img {
+    height: 40px; /* Adjust image height for medium screens */
+  }
+
+  .tools-slide {
+    animation: 45s slide infinite linear;
+  }
+}
+
+@media (max-width: 768px) {
+  .tools-slide {
+    animation: none;
+    justify-content: space-between; /* Distribute images equally */
+    padding-left: 10px; /* Reduce padding */
+  }
+
+  .tools-slide img {
+    height: 30px; /* Adjust image height for small screens */
+    margin-left: 10px;
+  }
+
+  .tools:before, .tools:after {
+    width: 50px; /* Adjust gradient size for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .tools-slide img {
+    height: 25px; /* Further adjust image height for very small screens */
+    margin-left: 5px;
+  }
+}

@@ -1,0 +1,122 @@
+.lunchflow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 32px;
+  background-color: black;
+  color: #fff;
+}
+
+.lunchflow-header h2 {
+  font-size: 50px;
+  color: #2dcbcb;
+  text-align: center;
+}
+
+.lunchflow-header span {
+  color: #eaeaeb;
+}
+
+.lunchflow-header p {
+  font-size: 20px;
+  max-width: 720px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #eaeaeb;
+}
+
+.lunchflow-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 32px;
+  justify-content: center; /* Center the cards */
+}
+
+.lunchflow-card {
+  background-color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  /* width: 100%; */
+  max-width: 500px; /* Limit max width for better responsiveness */
+}
+
+.lunchflow-card img {
+  width: 100%; /* Full width within card */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 16px;
+  object-fit: cover; /* Fill the card space without distortion */
+  max-height: 300px; /* Limit max height for responsiveness */
+}
+
+.lunchflow-card h5 {
+  font-size: 24px;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .lunchflow-header h2 {
+    font-size: 40px;
+  }
+  
+  .lunchflow-header p {
+    font-size: 18px;
+  }
+
+  .lunchflow-card img {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lunchflow-header h2 {
+    font-size: 36px;
+  }
+
+  .lunchflow-header p {
+    font-size: 16px;
+  }
+
+  .lunchflow-cards {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
+    gap: 20px;
+  }
+
+  .lunchflow-card img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .lunchflow-header h2 {
+    font-size: 32px;
+  }
+
+  .lunchflow-header p {
+    font-size: 14px;
+  }
+
+  .lunchflow-card {
+    padding: 15px;
+  }
+
+  .lunchflow-card h5 {
+    font-size: 20px;
+  }
+
+  .lunchflow-card img {
+    max-width: 100%;
+    height: auto;
+  }
+}

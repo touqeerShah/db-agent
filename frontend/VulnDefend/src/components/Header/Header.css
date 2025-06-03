@@ -1,0 +1,148 @@
+/* General header styling */
+.header-container {
+  background-color: rgb(0, 0, 0);
+  width: 100%;
+  padding: 15px 30px;
+  position: fixed; /* Fix header at the top of the page */
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 8px 15px rgba(45, 203, 203, 0.3);
+  box-sizing: border-box; /* Ensures padding doesn’t cause overflow */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo img {
+  height: 30px;
+}
+
+/* Navigation styling */
+.nav-links {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav-link {
+  color: #2dcbcb;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 5px 10px;
+  transition: color 0.3s ease, border 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #2debcb;
+}
+
+.waitlist-button {
+  background-color: #2dcbcb;
+  color: #333;
+  padding: 10px 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.waitlist-button:hover {
+  background-color: #2dcecb;
+}
+
+/* Hamburger menu icon for mobile */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #2dcbcb;
+}
+
+/* Close button styling */
+.close-button {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #2dcbcb;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 10px 20px;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 70%;
+    height: 100vh;
+    background-color: white;
+    padding-top: 60px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1001;
+  }
+
+  .nav-link {
+    padding: 10px 20px;
+    text-align: left;
+  }
+
+  .waitlist-button.desktop {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav-active {
+    transform: translateX(0);
+  }
+
+  .close-button {
+    display: block;
+    color: #2dcbcb;
+  }
+}
+
+/* Overlay styling for mobile menu */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.overlay-active {
+  display: block;
+}
+
+/* Further padding reduction for extra small screens */
+@media (max-width: 480px) {
+  .header-container {
+    padding: 8px 15px;
+  }
+}
+
+/* Adjustments for main content to avoid scrolling issues */
+.main-content {
+  padding-top: 80px; /* Adjust this to match the header height */
+  box-sizing: border-box;
+}
