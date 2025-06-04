@@ -1,3 +1,4 @@
+from pydantic import BaseModel, Field
 from .helper import AgentState
 from langgraph.graph import END, StateGraph, START
 from django.core.serializers.json import DjangoJSONEncoder
@@ -6,6 +7,7 @@ import time
 import json
 from datetime import datetime
 # from langgraph.checkpoint.sqlite import SqliteSaver
+from asgiref.sync import sync_to_async
 
 from .graph_nodes import (
     stream_node,
@@ -15,7 +17,9 @@ from .graph_nodes import (
     summary,
 )
 
-
+from api.utils.chat_utils import (
+    create_chat_message,
+)
 
 
 def classify_user_intent_check(state):
@@ -24,12 +28,12 @@ def classify_user_intent_check(state):
     if not intent_obj:
         return "__end"
 
-    print("intent:", intent_obj.intent)
+    print("intent:", intent_obj)
 
     # Route based on intent directly
-    if intent_obj.intent == "search_db":
+    if intent_obj.get("intent") == "search_db":
         return "query_database"
-    elif intent_obj.intent == "store_info":
+    elif intent_obj.get("intent") == "store_info":
         return "respond_general"
 
     return "__end"
@@ -77,20 +81,20 @@ class Agent:
 
         self.graph = builder.compile(
                 checkpointer=memory,
-                interrupt_after=[
-                    "detect_url",
-                    "validate_code_existence",
-                    "index",
-                    "scrape_data",
-                    "transform_code_instruction",
-                    "supervisor",
-                ],
+                # interrupt_after=[
+                #     "classify_user_intent",
+                #     "query_database",
+                #     "index",
+                #     "scrape_data",
+                #     "transform_code_instruction",
+                #     "supervisor",
+                # ],
                 # debug=True,
             )
 
         self.graph = builder.compile()
         self.model = model
-        self.collections.append(collection_name)
+        # self.collections.append(collection_name)
 
 
     async def report_stream(self, state: AgentState, chat_id: str):
@@ -102,15 +106,26 @@ class Agent:
                 "source": [],
             }
 
-            state["collection_names"] = self.collections  # Replace as needed
+            # state["collection_names"] = self.collections  # Replace as needed
 
             thread = {"configurable": {"thread_id": chat_id}, "recursion_limit": 250}
 
+            def make_json_serializable(obj):
+                if isinstance(obj, BaseModel):  # Pydantic model
+                    return obj.model_dump()
+                elif isinstance(obj, dict):
+                    return {k: make_json_serializable(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [make_json_serializable(item) for item in obj]
+                elif isinstance(obj, tuple):
+                    return tuple(make_json_serializable(item) for item in obj)
+                return obj
             async for event, chunk in self.graph.astream(
                 state, thread, stream_mode=["updates"]
             ):
                 print(f">>>>>>>>>>>>>>>>{chunk}<<<<<<<<<<<<<<<<<<")
-                s_serializable = DjangoJSONEncoder().encode(chunk)
+                serializable_chunk = make_json_serializable(chunk)
+                s_serializable = DjangoJSONEncoder().encode(serializable_chunk)
                 # Parse back into a JSON object to access fields
                 json_s_serializable = json.loads(s_serializable)
 
@@ -138,9 +153,21 @@ class Agent:
             self.message["status"] = "done"
             yield f'{{"message": {json.dumps(self.message)}}}\n'
         finally:
-            timestamp = datetime.fromtimestamp(time.time()).strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+            async_create_chat_message = sync_to_async(create_chat_message)
+
+            try:
+                response = self.message.get("response", {})
+                await async_create_chat_message(
+                    chat_id=chat_id,
+                    question=response.get("query", ""),
+                    answer=response.get("answer", ""),
+                    intent_classification=response.get("intent_classification", {}),
+                    sql_response=response.get("sql_response", {}),
+                )
+            except Exception as e:
+                print("[create_chat_message error]", e)
+
             print(f"Done at {timestamp}")
 
 

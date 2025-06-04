@@ -46,17 +46,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Your JWT secret key
-AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY", "")
-AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY", "")
-AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "")
-AWS_MODEL_ID = os.getenv("AWS_MODEL_ID", "")
-AWS_SECRET_TOKEN = os.getenv("AWS_SECRET_TOKEN", "")
-WEB_SOCKET_URL = os.getenv("WEB_SOCKET_URL", "ws://localhost:4000/ws/llm_message")
 
 
-AWS_DEFAULT_REGION = "eu-central-1"
-AWS_MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+
 ###
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 # AWS
@@ -83,12 +75,6 @@ def get_bed_rock_object():
     return bedrock_client
 
 
-def get_bed_rock_embedding():
-    bedrock_client = get_bed_rock_object()
-    embeddings = BedrockEmbeddings(
-        client=bedrock_client, model_id="amazon.titan-embed-text-v2:0"
-    )
-    return embeddings
 
 
 def get_local_embedding():
@@ -113,16 +99,7 @@ class LineList(BaseModel):
     lines: List[str] = Field(description="Lines of text")
 
 
-def get_llm_object(collections_name, model="llama-pro:8b-instruct-q5_K_M"):
-    #  uncommenr when deployed on AWS
-    # bedrock_client = get_bed_rock_object()
-    # llm = ChatBedrock(
-    #     region_name=AWS_DEFAULT_REGION,
-    #     client=bedrock_client,
-    #     model_id=AWS_MODEL_ID,
-    #     streaming=True,
-    #     # callbacks=[StreamingStdOutCallbackHandler()],
-    # )
+def get_llm_object(collections_name, model="mistral:latest"):
 
     # for test local with lama and  model
     llm = Ollama(
@@ -144,10 +121,8 @@ def get_llm_object(collections_name, model="llama-pro:8b-instruct-q5_K_M"):
 
 def get_vector_store(collections_name):
     # get/create a chroma client
-    #  for AWS deployment
-    embeddings = get_bed_rock_embedding()
     #  to run local
-    # embeddings = get_local_embedding()
+    embeddings = get_local_embedding()
     vectorstore = Chroma(
         embedding_function=embeddings,
         persist_directory=DB_PATH,
@@ -208,6 +183,7 @@ def load_chroma_gpt(filename, collection_name):
 def get_multiple_retriever(collections_name):
     retrievers = []
     # embeddings = get_local_embedding()
+    print("= = = => ",collections_name)
     for collection_name in collections_name:
         vectorstore = get_vector_store(collection_name)
         retrievers.append(

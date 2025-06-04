@@ -16,7 +16,6 @@ export async function verifyGoogleToken(idToken) {
     });
 
     if (!response.ok) {
-      console.log("hehehhhehehhehe")
       // throw new Error(`Server error: ${response.statusText}`);
       return {isLogin:false,user:{}}
     }

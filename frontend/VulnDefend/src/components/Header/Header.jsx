@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 
 const Header = ({ loginResponse }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
-
+  console.log("loginResponse",loginResponse)
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
@@ -45,7 +45,7 @@ const Header = ({ loginResponse }) => {
           {/* Consolidated Login/Chat Link */}
           <NavLink
             className=" nav-link"
-            to={loginResponse.isLogin ? `/chat/${loginResponse.googleId}` : "/login"}
+            to={loginResponse.isLogin ? `/chat/${loginResponse.user.google_id}` : "/login"}
             onClick={toggleNav}
             end
           >
@@ -56,7 +56,7 @@ const Header = ({ loginResponse }) => {
         {/* Demo button for larger screens, only one button with conditional path */}
         <NavLink
           className="waitlist-button desktop"
-          to={loginResponse.isLogin ? `/chat/${loginResponse.googleId}` : "/login"}
+          to={loginResponse.isLogin ? `/chat/${loginResponse.user.google_id}` : "/login"}
           end
         >
           {loginResponse.isLogin ? "Chat" : "Login"}
@@ -71,7 +71,7 @@ const Header = ({ loginResponse }) => {
 Header.propTypes = {
   loginResponse: PropTypes.shape({
     isLogin: PropTypes.bool.isRequired,
-    googleId: PropTypes.string,
+    user: PropTypes.object,
   }).isRequired,
 };
 

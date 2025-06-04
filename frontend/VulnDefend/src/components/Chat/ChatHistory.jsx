@@ -4,7 +4,7 @@ import { faSearch, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 const ChatHistory = ({ loginResponse, chatList, setChatid, onDeleteChat }) => {
     const { isLogin } = loginResponse;
-
+    console.log("chatList", chatList)
     // Function to calculate how many days old the chat is
     const calculateDaysOld = (updatedAt) => {
         const updatedDate = new Date(updatedAt);
@@ -29,8 +29,8 @@ const ChatHistory = ({ loginResponse, chatList, setChatid, onDeleteChat }) => {
                         </div>
                     </div>
 
-                    {chatList && chatList.length > 0 ? (
-                        chatList.map((chat) => (
+                    {chatList && chatList.results.length > 0 ? (
+                        chatList.results.map((chat) => (
                             <div
                                 key={chat.chat_id}
                                 className="chat-discussion message-active"
@@ -40,7 +40,7 @@ const ChatHistory = ({ loginResponse, chatList, setChatid, onDeleteChat }) => {
                                     <p className="chat-name">{chat.title || "Chat Title"}</p>
                                 </div>
                                 <div className="chat-timer">
-                                {`${calculateDaysOld(chat.updated_at)} day(s) old`}                                    <button
+                                    {`${calculateDaysOld(chat.updated_at)} day(s) old`}                                    <button
                                         className="delete-button"
                                         onClick={(e) => {
                                             e.stopPropagation(); // Prevent triggering changeChat on delete
@@ -68,13 +68,21 @@ ChatHistory.propTypes = {
         isLogin: PropTypes.bool.isRequired,
         googleId: PropTypes.string
     }).isRequired,
-    chatList: PropTypes.arrayOf(
-        PropTypes.shape({
-            chat_id: PropTypes.string.isRequired,
-            title: PropTypes.string,
-            updated_at: PropTypes.string.isRequired
-        })
-    ).isRequired,
+    chatList: PropTypes.shape({
+        results: PropTypes.arrayOf(
+            PropTypes.shape({
+                chat_id: PropTypes.string.isRequired,
+                title: PropTypes.string,
+                updated_at: PropTypes.string.isRequired
+            })
+        ).isRequired,
+        current_page: PropTypes.number,
+        total_pages: PropTypes.number,
+        total_chats: PropTypes.number,
+        has_next: PropTypes.bool,
+        has_previous: PropTypes.bool
+    }).isRequired
+    ,
     setChatid: PropTypes.func,
     onDeleteChat: PropTypes.func.isRequired
 };

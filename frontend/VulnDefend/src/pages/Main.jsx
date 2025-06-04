@@ -17,7 +17,7 @@ export function loader() {
         return defer({
             loginResponse: {
                 isLogin: false,
-                googleId: "",
+                user: {},
             }
         })
     }

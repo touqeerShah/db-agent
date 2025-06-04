@@ -15,7 +15,7 @@ export default function NotFound() {
     useEffect(() => {
         loginResponse.then((data) => {
             if (data.isLoggedIn) {
-                navigate(`/chat/${data.googleId}`);
+                navigate(`/chat/${data.user.google_id}`);
             } else {
                 navigate("/");
             }

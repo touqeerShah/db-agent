@@ -7,7 +7,7 @@ def execute_query(query: str) -> List[Dict[str, Any]]:
         conn = psycopg2.connect(
             dbname="ai",
             user="ai",
-            password="ai123456789",  # Decoded from base64: YWkxMjM0NTY3ODk=
+            password="YWkxMjM0NTY3ODk=",  # Decoded from base64: YWkxMjM0NTY3ODk=
             host="localhost",
             port="5432"
         )
@@ -32,7 +32,7 @@ def get_role_permissions(role: str) -> List[Dict[str, Any]]:
         conn = psycopg2.connect(
             dbname="ai",
             user="ai",
-            password="ai123456789",
+            password="YWkxMjM0NTY3ODk=",
             host="localhost",
             port="5432"
         )

@@ -41,20 +41,7 @@ const Login = () => {
             email: data.user.email,
           });
           // Call the create_user API to register the user on backend
-          await fetch(`${BACKEND_URL}/api/create_user`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${idToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              google_id: data.user.google_id,
-              name: data.user.name,
-              picture: data.user.picture,
-              email: data.user.email,
-              role: "admin"  // Optional or based on logic
-            }),
-          });
+
 
           // Navigate to `redirectTo` path or default to `/chat/:id`
           if (redirectTo === "/" || redirectTo === "") {
@@ -89,6 +76,20 @@ const Login = () => {
       const data = await verifyGoogleToken(idToken);
 
       if (data && data.isLogin) {
+        await fetch(`${BACKEND_URL}/api/create_user/`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            google_id: data.user.google_id,
+            name: data.user.name,
+            picture: data.user.picture,
+            email: data.user.email,
+            role: "admin"  // Optional or based on logic
+          }),
+        });
         // Store user data if needed
         localStorage.setItem("google_id", data.user.google_id);
         localStorage.setItem("name", data.user.name);

@@ -2,16 +2,16 @@ from rest_framework import serializers
 from .models import GoogleUser, Chat, ChatMessage
 
 
-class UserSerializer(serializers.ModelSerializer):  # Use ModelSerializer instead
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoogleUser
-        fields = ["google_id", "email", "name", "picture"]
+        fields = ["google_id", "email", "name", "picture", "role"]
 
 
 class LimitedChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
-        fields = ["title", "updated_at","chat_id"]  # Include only required fields
+        fields = ["title", "updated_at", "chat_id"]
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):
@@ -21,8 +21,6 @@ class ChatMessageSerializer(serializers.ModelSerializer):
             "question",
             "answer",
             "created_at",
-            "lnode",
-            "urls",
-            "code",
-            "code_instruction",
-        ]  # Include relevant fields for messages
+            "intent_classification",
+            "sql_response",
+        ]

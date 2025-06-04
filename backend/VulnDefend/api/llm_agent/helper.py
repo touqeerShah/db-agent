@@ -8,7 +8,6 @@ from langchain_core.messages import BaseMessage
 
 class IntentResponse(BaseModel):
     intent: str = Field(..., description="Must be 'search_db' or 'store_info'")
-    reason: str = Field(..., description="Explanation of why this intent was chosen")
 
 
 class SQLResponse(BaseModel):
@@ -21,6 +20,8 @@ class SQLResponse(BaseModel):
 class AgentState(TypedDict):
     chat_id: str
     query: str
+    answer:str
+    db_result:str
     sql_response: SQLResponse
     intent_classification: IntentResponse
     role: str

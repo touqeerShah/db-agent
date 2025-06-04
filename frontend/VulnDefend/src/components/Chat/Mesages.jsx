@@ -2,51 +2,29 @@ import PropTypes from 'prop-types';
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy } from '@fortawesome/free-solid-svg-icons';
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import {
   faLink,
-  faFileDownload,
   faDatabase,
   faSearch,
   faCheckCircle,
-  faCode,
-  faUserTie,
-  faGlobe,
-  faClipboard,
-  faFlask,
-  faPuzzlePiece,
-  faHistory
+  
 } from '@fortawesome/free-solid-svg-icons';
 
 const stepIcons = {
-  detect_url: <FontAwesomeIcon icon={faLink} />, // Detecting URLs
-  scrape_data: <FontAwesomeIcon icon={faFileDownload} />, // Scraping Data
-  index: <FontAwesomeIcon icon={faDatabase} />, // Building Index
-  process_query: <FontAwesomeIcon icon={faSearch} />, // Processing Query
-  validate_code_existence: <FontAwesomeIcon icon={faCheckCircle} />, // Validating Code Existence
-  transform_code_instruction: <FontAwesomeIcon icon={faCode} />, // Transforming Code Instruction
-  supervisor: <FontAwesomeIcon icon={faUserTie} />, // Supervising Workflow
-  general: <FontAwesomeIcon icon={faGlobe} />, // Handling General Queries
-  summary: <FontAwesomeIcon icon={faClipboard} />, // Summarizing Data
-  write_hardhat_test_case: <FontAwesomeIcon icon={faFlask} />, // Writing Hardhat Test Case
-  write_foundry_test_case: <FontAwesomeIcon icon={faFlask} />, // Writing Foundry Test Case
-  find_variability: <FontAwesomeIcon icon={faPuzzlePiece} />, // Finding Variability
-  generate_chat_history: <FontAwesomeIcon icon={faHistory} />, // Generating Chat History
+  classify_user_intent: <FontAwesomeIcon icon={faLink} />, // Detecting URLs
+  query_database: <FontAwesomeIcon icon={faDatabase} />, // Scraping Data
+  respond_general: <FontAwesomeIcon icon={faSearch} />, // Processing Query
+  stream: <FontAwesomeIcon icon={faCheckCircle} />, // Validating Code Existence
+
 };
 const humanReadableStep = {
-  detect_url: "Detecting URLs",
-  scrape_data: "Scraping Data",
-  index: "Building Index",
-  process_query: "Processing Query",
-  validate_code_existence: "Validating Code Existence",
-  transform_code_instruction: "Transforming Code Instruction",
-  supervisor: "Supervising Workflow",
-  general: "Handling General Queries",
-  summary: "Summarizing Data",
-  write_hardhat_test_case: "Writing Hardhat Test Case",
-  write_foundry_test_case: "Writing Foundry Test Case",
-  find_variability: "Finding Variability",
-  generate_chat_history: "Generating Chat History",
+  classify_user_intent: "Classify User Intent",
+  query_database: "Query Database",
+  respond_general: "Respond General",
+  stream: "Stream",
   default: "Processing...",
 };
 const Messages = ({ messages, lastStep }) => {
@@ -107,36 +85,69 @@ const MessageBubble = ({ message, type, metadata, lastStep }) => {
   };
 
   // Function to render message with formatted code blocks
-  const renderMessageContent = () => {
-    const codeBlockRegex = /```([^`]+)```/g;
-    const linkRegex = /(https?:\/\/[^\s]+)/g;
 
-    const parts = message.split(codeBlockRegex);
 
-    return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        // Code block
-        return (
-          <pre key={index} className="code-block">
-            <code>{part}</code>
-          </pre>
-        );
-      }
+const renderMessageContent = () => {
+  if (!message || typeof message !== 'string') return null;
+  console.log("message : ",message)
+  // If message starts with a Markdown code block like ```markdown ... ```
+  const markdownCodeBlockMatch = message.match(/```(?:markdown)?\s*([\s\S]*?)```/);
+  console.log("markdownCodeBlockMatch",markdownCodeBlockMatch)
+  if (markdownCodeBlockMatch) {
+    // Extract and render the inner Markdown content
+    const markdownContent = markdownCodeBlockMatch[1];
 
-      // Process links in plain text
-      const linkified = part.split(linkRegex).map((chunk, i) =>
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            return !inline ? (
+              <pre className="bg-gray-800 text-white p-2 rounded-md overflow-x-auto">
+                <code className={className} {...props}>{children}</code>
+              </pre>
+            ) : (
+              <code className="bg-gray-200 px-1 rounded">{children}</code>
+            );
+          },
+          a({ href, children }) {
+            return (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                {children}
+              </a>
+            );
+          },
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
+  }
+
+  // Fallback: just render message as normal text with links auto-detected
+  const linkRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = message.split(linkRegex);
+
+  return (
+    <span>
+      {parts.map((chunk, index) =>
         linkRegex.test(chunk) ? (
-          <a key={i} href={chunk} target="_blank" rel="noopener noreferrer">
+          <a key={index} href={chunk} target="_blank" rel="noopener noreferrer">
             {chunk}
           </a>
         ) : (
-          chunk
+          <span key={index}>{chunk}</span>
         )
-      );
-
-      return <span key={index}>{linkified}</span>;
-    });
-  };
+      )}
+    </span>
+  );
+};
 
   return (
     <div className={`chat-message ${type === 'ai' ? 'chat-response' : 'chat-text-only'}`}>

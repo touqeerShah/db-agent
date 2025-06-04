@@ -8,6 +8,8 @@ import ChatHistory from "../../components/Chat/ChatHistory";
 import Messages from "../../components/Chat/Mesages";
 import { defer, useLoaderData, Await } from "react-router-dom";
 import { requireAuth } from "../../utils/auth";
+import { useRef } from 'react';
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export async function loader({ request }) {
@@ -57,7 +59,6 @@ const ChatPage = () => {
   const { id, chatid: initialChatid } = useParams();
   const dataPromise = useLoaderData();
   const navigate = useNavigate();
-
   const [chatid, setChatid] = useState(initialChatid || "");
   const [CHAT_URL, setChatUrl] = useState("");
   const [message, setMessage] = useState('');
@@ -72,6 +73,9 @@ const ChatPage = () => {
   const [reloadChatList, setReloadChatList] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [lastStep, setLastStep] = useState("");
+  const readerRef = useRef(null);
+
+  const [isCancelled, setIsCancelled] = useState(false);
 
   const BASE_URL = `${BACKEND_URL}/api/report_stream`;
 
@@ -210,96 +214,83 @@ const ChatPage = () => {
     setMessage("")
   };
 
-  const startStream = async () => {
-    const idToken = localStorage.getItem("loggedin");
+const startStream = async () => {
+  const idToken = localStorage.getItem("loggedin");
 
-    try {
-      const response = await fetch(`${CHAT_URL}?query=${message}&chat_id=${chatid}&is_memory=false`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-          'Content-Type': 'application/json',
-        }
-      });
+  try {
+    const response = await fetch(`${CHAT_URL}?query=${message}&chat_id=${chatid}&is_memory=false`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+      }
+    });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+    const reader = response.body.getReader();
+    readerRef.current = reader; // Save reader for cancellation
+    const decoder = new TextDecoder();
 
-      let buffer = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    let buffer = '';
+    while (true) {
+      if (isCancelled) break;
 
-        buffer += decoder.decode(value, { stream: true });
+      const { done, value } = await reader.read();
+      if (done) break;
 
-        const lines = buffer.split('\n');
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
 
-        for (let line of lines) {
-          if (line.startsWith("data:")) {
-            const cleanedData = line.replace(/^data:\s*/, '');
-            console.log(cleanedData)
-            try {
-              // Parse top-level JSON
-              const data = JSON.parse(cleanedData);
-              console.log("data 1 = = = >", data)
-              console.log("data.message.status = = = >", data.status)
+      for (let line of lines) {
+        if (line.startsWith("data:")) {
+          const cleanedData = line.replace(/^data:\s*/, '');
+          try {
+            const data = JSON.parse(cleanedData);
 
-              if (data.message && data.status && data.status.toLowerCase() === "done") {
-                const parsedMessage = JSON.parse(data.message);
-
-
-                // Clean and parse nested `response` field
-                if (parsedMessage && parsedMessage.response) {
-
-                  // const responseString = parsedMessage.response.replace(/\\"/g, '"').replace(/\\n/g, '');;
-
-                  console.log("Parsed Response:", parsedMessage.response);
-
-                  const formattedMessages = [
-                    {
-                      message: parsedMessage.response.answer,
-                      type: 'ai',
-                      metadata: {
-                        question: parsedMessage.response.question,
-                        created_at: new Date().toISOString(),
-                        lnode: parsedMessage.response.lnode,
-                        urls: parsedMessage.response.urls,
-                        code: parsedMessage.response.code,
-                        code_instruction: parsedMessage.response.code_instruction
-                      }
+            if (data.message && data.status && data.status.toLowerCase() === "done") {
+              const parsedMessage = JSON.parse(data.message);
+              if (parsedMessage?.response) {
+                const formattedMessages = [
+                  {
+                    message: parsedMessage.response.answer,
+                    type: 'ai',
+                    metadata: {
+                      question: parsedMessage.response.question,
+                      created_at: new Date().toISOString(),
+                      lnode: parsedMessage.response.lnode,
+                      urls: parsedMessage.response.urls,
+                      code: parsedMessage.response.code,
+                      code_instruction: parsedMessage.response.code_instruction
                     }
-                  ];
+                  }
+                ];
 
-                  setChatMessages(prevMessages => [
-                    ...prevMessages,
-                    ...formattedMessages
-                  ]);
-
-                  setIsSending(false);
-                  setReloadChatList(true);
-                  setLastStep(""); // Reset last step
-
-                }
-              } else {
-                console.log("")
-                const parsedMessage = JSON.parse(data.message);
-
-                console.log("cleanedMessage 2 = = = >", parsedMessage)
-                setLastStep(parsedMessage.response.lnode || "Processing..."); // Update last step
+                setChatMessages(prev => [...prev, ...formattedMessages]);
+                setIsSending(false);
+                setReloadChatList(true);
+                setLastStep("");
               }
-            } catch (error) {
-              console.error("Error parsing JSON:", error);
+            } else {
+              const parsedMessage = JSON.parse(data.message);
+              setLastStep(parsedMessage.response.lnode || "Processing...");
             }
+          } catch (err) {
+            console.error("Error parsing message chunk:", err);
           }
         }
-
-        // Clear the buffer up to the last newline to keep any remaining partial message
-        buffer = buffer.slice(buffer.lastIndexOf('\n') + 1);
       }
-    } catch (error) {
+
+      buffer = buffer.slice(buffer.lastIndexOf('\n') + 1);
+    }
+  } catch (error) {
+    if (!isCancelled) {
       console.error("Error with stream:", error);
     }
-  };
+  } finally {
+    readerRef.current = null;
+    setIsSending(false);
+    setIsCancelled(false); // Reset
+  }
+};
 
 
   const handleKeyPress = (e) => {
@@ -386,11 +377,20 @@ const ChatPage = () => {
                 value={fileDetails ? `${fileDetails}\n${message}` : message}
               />
               <FontAwesomeIcon
-                className={`chat-icon chat-send clickable ${isSending ? 'disabled' : ''}`}
-                onClick={!isSending ? sendMessage : null}
+                className={`chat-icon chat-send clickable ${isSending ? 'cancel' : ''}`}
+                onClick={() => {
+                  if (isSending && readerRef.current) {
+                    // Cancel current stream
+                    setIsCancelled(true);
+                    readerRef.current.cancel();
+                  } else if (!isSending) {
+                    sendMessage();
+                  }
+                }}
                 icon={isSending ? faSpinner : faPaperPlane}
                 spin={isSending}
               />
+
             </div>
           </section>
         </div>

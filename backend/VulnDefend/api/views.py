@@ -1,5 +1,6 @@
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 from django.core.cache import cache
 import time
@@ -34,7 +35,7 @@ from django.http import StreamingHttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from api.utils.chat_utils import create_chat, get_user_chats_paginated, get_chat_details
+from api.utils.chat_utils import create_chat, get_user_chats_paginated
 from .serializers import LimitedChatSerializer, ChatMessageSerializer
 from .models import Chat, ChatMessage
 
@@ -67,12 +68,14 @@ class ReportGenerationView(View):
             # chat_id = generate_unique_hash(chat_id + user_id + timestamp)
 
             agent_state_data = {
-                "query": "",
-                "sql_response": SQLResponse(is_allow="store_info", query=[]),
-                "intent_classification": IntentResponse(intent="store_info", reason=""),
+                "query":query,
+                "chat_id":chat_id,
+                "sql_response": SQLResponse(is_allow=False, query=[]),
+                "intent_classification": IntentResponse(intent="store_info"),
                 "role": "admin",  # or "admin", "employee"
-                "collection_names": [],
+                "collection_names": ["store_info"],
                 "summary": "",
+                "answer":""
             }
             # print("agent_state_data :  ", agent_state_data)
             google_user, created = GoogleUser.objects.get_or_create(
@@ -143,68 +146,51 @@ class ReportGenerationView(View):
             )
 
 
-class ListChatView(generics.ListAPIView):
-    serializer_class = LimitedChatSerializer
-
-    def get_queryset(self):
-        request = self.request
+class ListChatView(APIView):
+    def get(self, request):
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             raise AuthenticationFailed("Authorization header missing or malformed.")
 
         id_token = auth_header.split(" ")[1]
-        page = request.GET.get("page", 1)
-        per_page = json.loads(request.GET.get("per_page", 20))
+        verification_result, _ = async_to_sync(_verify_google_token)(id_token, request)
 
-        # Perform JWT verification
-        verification_result, status_code = async_to_sync(_verify_google_token)(
-            id_token, request
-        )
         if not verification_result.get("isLogin"):
-            raise AuthenticationFailed("JWT verification failed. User not logged in.")
+            raise AuthenticationFailed("JWT verification failed.")
 
-        # Retrieve Google user ID
         user_id = verification_result.get("user", {}).get("google_id")
         if not user_id:
-            raise AuthenticationFailed("Invalid token: User ID not found.")
-        print(user_id)
-        # Return only title, updated_at, and chat_id for each chat, sorted by updated_at
-        return get_user_chats_paginated(user_id, page, per_page)
+            raise AuthenticationFailed("User ID not found in token.")
 
+        page = int(request.GET.get("page", 1))
+        per_page = int(request.GET.get("per_page", 20))
+
+        paginated_data = get_user_chats_paginated(user_id, page, per_page)
+        return Response(paginated_data)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ChatMessagesView(generics.ListAPIView):
     serializer_class = ChatMessageSerializer
-    permission_classes = [AllowAny]  # Temporarily allow any access
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         request = self.request
         auth_header = request.headers.get("Authorization")
-        # print("Authorization header:", auth_header)  # Add this line for debugging
 
         if not auth_header or not auth_header.startswith("Bearer "):
             raise AuthenticationFailed("Authorization header missing or malformed.")
 
         id_token = auth_header.split(" ")[1]
-        chat_id = self.kwargs.get("chat_id")  # Retrieve chat_id from URL parameters
-        # print(id_token)
-        # Step 1: Perform JWT verification
+        chat_id = self.kwargs.get("chat_id")
+
         verification_result, status_code = async_to_sync(_verify_google_token)(
             id_token, request
         )
         if not verification_result.get("isLogin"):
-            raise AuthenticationFailed("JWT verification failed. User not logged in.")
+            raise AuthenticationFailed("JWT verification failed.")
 
-        # Step 2: Retrieve Google user ID from verification result
-        user_id = verification_result.get("user", {}).get("google_id")
-        if not user_id:
-            raise AuthenticationFailed("Invalid token: User ID not found.")
-
-
-
-        # Return all messages for the specified chat
-        return get_chat_details(chat_id)
-
+        # ✅ Return actual model instances here
+        return ChatMessage.objects.filter(chat__chat_id=chat_id).order_by("created_at")
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ChatDeleteView(generics.DestroyAPIView):
@@ -260,6 +246,7 @@ def get_user_details(request, google_id):
 
 @api_view(["POST"])
 def create_user(request):
+    print("Request Path:", request.path)
     """Create or get a Google user based on ID."""
     data = request.data
     google_id = data.get("google_id")

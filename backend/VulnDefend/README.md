@@ -4,6 +4,8 @@ source ./path/to/bin/activate
 
 ```
 # create user DB
+python manage.py makemigrations api
+
 python manage.py makemigrations
 python manage.py migrate 
 
@@ -17,8 +19,9 @@ pip install django-cors-headers
 pip install psycopg2-binary
 pip install python-dotenv
 pip install pillow==10.0.0
-
+pip install djangorestframework
 pip install pip-tools
+pip install --upgrade --force-reinstall -r requirements.txt --break-system-packages
 
 ## API's
 ```
