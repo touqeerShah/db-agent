@@ -26,6 +26,7 @@ class AgentState(TypedDict):
     intent_classification: IntentResponse
     role: str
     collection_names: List[str]
+    lnode:str
     summary: str
     error:bool
     error_message:str

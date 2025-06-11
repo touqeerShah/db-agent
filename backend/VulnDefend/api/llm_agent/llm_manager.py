@@ -63,18 +63,6 @@ async def send_websocket_message(uri, message):
         await websocket.send(message)
 
 
-def get_bed_rock_object():
-
-    bedrock_client = boto3.client(
-        service_name="bedrock-runtime",
-        region_name="eu-central-1",
-        aws_access_key_id="",  # those are not need on Deployment time
-        aws_secret_access_key="",
-        aws_session_token="",
-    )
-    return bedrock_client
-
-
 
 
 def get_local_embedding():
@@ -99,7 +87,7 @@ class LineList(BaseModel):
     lines: List[str] = Field(description="Lines of text")
 
 
-def get_llm_object(collections_name, model="mistral:latest"):
+def get_llm_object(collections_name, model="deepseek-r1:14b"):
 
     # for test local with lama and  model
     llm = Ollama(

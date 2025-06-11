@@ -20,7 +20,9 @@ class Chat(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=255, blank=True, null=True)
-    summary= models.CharField() # Collection name if a file is uploaded
+    summary = models.CharField()  # Collection name if a file is uploaded
+    lnode = models.CharField()
+
     # New: related ChatMessages
     def __str__(self):
         return f"Chat {self.chat_id} for {self.google_user.name}"
@@ -49,10 +51,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatMessage
-        fields = ['message']
+        fields = ["message"]
 
     def get_message(self, obj):
-        return {
-            "question": obj.question,
-            "answer": obj.answer
-        }
+        return {"question": obj.question, "answer": obj.answer}

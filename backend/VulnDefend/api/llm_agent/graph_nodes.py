@@ -15,7 +15,18 @@ from api.utils.chat_utils import (
     get_last_chat_message,
     update_chat_summary,
     get_chat_summary,
+    update_chat_lnode,
 )
+
+
+def extract_sql_from_response(response: str) -> str:
+    # Remove <think>...</think> block if it exists
+    cleaned = re.sub(r"<think>.*?</think>", "", response, flags=re.DOTALL)
+
+    # Strip leading/trailing whitespace
+    cleaned = cleaned.strip()
+
+    return cleaned
 
 
 def extract_valid_json(raw_response: str) -> Optional[Dict[str, Any]]:
@@ -54,7 +65,7 @@ def query_database_function(state: AgentState) -> AgentState:
     role = state["role"]
     qa_advanced, llm = get_llm_object(state["collection_names"])
     role_perms = get_role_permissions(role)
-
+    state["lnode"]="query_database"
     if not qa_advanced or not llm:
         raise ValueError("Missing LLM or QA object")
 
@@ -153,28 +164,33 @@ CREATE TABLE permissions (
 
     # Ask LLM to generate the SQL query
     message = f"""
-        You are a SQL expert. Based on the following table schema and the user request, generate ONLY the SQL query.
+        You are a SQL generator. Your output must ONLY be a valid PostgreSQL SQL query.
+
+        STRICT RULES:
+        - Do NOT output any thinking or explanation.
+        - Do NOT output <think> or markdown.
+        - Do NOT include "Here is your query", "SQL:", or similar.
+        - Output the SQL query ONLY. No formatting. No wrapping. No commentary.
 
         Schema:
         {table_schema}
 
         User question:
         "{query_text}"
-        - Rule not ```sql 
-        - or no need to wrap with anything
-        Only output a valid PostgreSQL SQL query. Do not explain or wrap in JSON.
         """
 
     try:
         response = llm.invoke([HumanMessage(content=message)])
-        raw_sql = response
-        print("\nRaw SQL:", raw_sql)
+        # raw_sql = response
+        raw_sql = extract_sql_from_response(response)
+
+        # print("\nRaw SQL:", raw_sql)
         print("\n Raw role_perms:", role_perms, "\n")
 
         # Step 1: Extract all table names from SQL (basic method)
         table_names = role_perms
         operation, table_names = analyze_sql_query(raw_sql)
-        print(f"🔍 Operation: {operation}, Tables: {table_names}")
+        # print(f"🔍 Operation: {operation}, Tables: {table_names}")
 
         # not_allowed = []
         # for table in table_names:
@@ -203,9 +219,11 @@ CREATE TABLE permissions (
 
         # Step 3: If allowed, execute query
         results = execute_query(raw_sql)
-        print("results : ",results,"\n\n")
+        print("results : ", results, "\n\n")
         state["db_result"] = results
-        print("\nstate : ",state)
+        print("\nstate : ", state)
+        update_chat_lnode(chat_id=state["chat_id"], lnode="query_database")
+
         return state
     except Exception as e:
         print("Query generation or execution failed:", e)
@@ -221,7 +239,9 @@ def respond_general_function(state: AgentState) -> AgentState:
     intent = intent_classification["intent"]
     qa_advanced, llm = get_llm_object(state["collection_names"])
     summary_history = get_chat_summary(state["chat_id"])
-    print("\n\n\nintent : = == = = = == == >>>>> ", summary_history)
+    state["lnode"]="respond_general"
+
+    # print("\n\n\nintent : = == = = = == == >>>>> ", summary_history)
 
     # Shared Markdown rules message prefix
     markdown_rules = """
@@ -239,7 +259,7 @@ def respond_general_function(state: AgentState) -> AgentState:
         """
         try:
             response = qa_advanced.invoke(message)
-            raw_result = response["result"]
+            raw_result = extract_sql_from_response(response["result"])
             state["answer"] = raw_result
         except Exception as e:
             print("Error while generating outline:", e)
@@ -249,6 +269,7 @@ def respond_general_function(state: AgentState) -> AgentState:
 
     elif intent == "search_db":
         response_data = state.get("db_result", None)
+        print("response_data", response_data)
         if not response_data:
             markdown_response = "⚠️ No data found or access denied."
             state["answer"] = markdown_response
@@ -274,25 +295,30 @@ def respond_general_function(state: AgentState) -> AgentState:
             ### User History / Context:
             {summary_history}
             """
+            print(" = = = == = > ", message)
             try:
                 response = llm.invoke([HumanMessage(content=message)])
-                markdown_response = response
+                markdown_response = extract_sql_from_response(response)
                 state["answer"] = markdown_response
+                print(" = = = == = > ", markdown_response)
+
             except Exception as e:
                 print("Error formatting DB result:", e)
                 markdown_response = "⚠️ Failed to format result."
                 state["error"] = True
                 state["error_message"] = "Server Error Try again"
-    print("state : = == = = = == == >>>>> ", state)
+    # print("state : = == = = = == == >>>>> ", state)
+    update_chat_lnode(chat_id=state["chat_id"], lnode="respond_general")
     return state
 
 
 def classify_user_intent(state: AgentState) -> AgentState:
-    print("state : ", state)
+    # print("state : ", state)
     query = state["query"]
     qa_advanced, llm = get_llm_object(state["collection_names"])
     if not qa_advanced or not llm:
         return state
+    state["lnode"]="classify_user_intent"
 
     class IntentResponse(BaseModel):
         intent: str = Field(..., description="Must be 'search_db' or 'store_info'")
@@ -300,40 +326,40 @@ def classify_user_intent(state: AgentState) -> AgentState:
     schema = json.dumps(IntentResponse.model_json_schema())
 
     message = f"""
-You are a classification assistant. Your task is to identify the **intent** of the user's query.
+            You are a classification assistant. Your task is to identify the **intent** of the user's query.
 
-### Intents:
-- "search_db": When the query is about structured data such as tables or records (e.g., product_warranty_status, vendor_purchases, vendor_payments, sales, bills, products, customers, vendors).
-- "store_info": When the query is about store-related operations, usage, policies, or is a general natural-language question.
+            ### Intents:
+            - "search_db": When the query is about structured data such as tables or records (e.g., product_warranty_status, vendor_purchases, vendor_payments, sales, bills, products, customers, vendors).
+            - "store_info": When the query is about store-related operations, usage, policies, or is a general natural-language question.
 
-### Instructions:
-- Carefully read the user query.
-- Choose **only one** intent from the list above.
-- Return a **strictly valid JSON** object, with no trailing commas, no code fences, and no extra text.
+            ### Instructions:
+            - Carefully read the user query.
+            - Choose **only one** intent from the list above.
+            - Return a **strictly valid JSON** object, with no trailing commas, no code fences, and no extra text.
 
-### User Query:
-"{query}"
+            ### User Query:
+            "{query}"
 
-### Required Format:
-Return **exactly**:
-{{
-  "intent": "search_db"
-}}
+            ### Required Format:
+            Return **exactly**:
+            {{
+            "intent": "search_db"
+            }}
 
-OR
+            OR
 
-{{
-  "intent": "store_info"
-}}
+            {{
+            "intent": "store_info"
+            }}
 
-Nothing else. Do NOT include markdown, commentary, or schema again.
-"""
+            Nothing else. Do NOT include markdown, commentary, or schema again.
+        """
 
-    print("message:", message)
+    # print("message:", message)
     try:
         response = llm.invoke([HumanMessage(content=message)])
-        raw_result = response
-        print("Raw classification response:", raw_result)
+        raw_result = extract_sql_from_response(response)
+        # print("Raw classification response:", raw_result)
 
         parsed = extract_valid_json(raw_result)
         if parsed:
@@ -347,11 +373,10 @@ Nothing else. Do NOT include markdown, commentary, or schema again.
 
     except Exception as e:
         print("Intent classification error:", e)
-        state["intent_classification"] = IntentResponse(
-            intent="search_db"
-        ).model_dump()
+        state["intent_classification"] = IntentResponse(intent="search_db").model_dump()
+    update_chat_lnode(chat_id=state["chat_id"], lnode="classify_user_intent")
+    # print("= = = = = >", state["intent_classification"])
 
-    print("= = = = = >", state["intent_classification"])
     return state
 
 
@@ -364,13 +389,14 @@ def summary(state: AgentState):
     print("summary_node")
     try:
         qa_advanced, llm = get_llm_object(state["collection_names"])
+        state["lnode"]="summary"
 
         if not qa_advanced or not llm:
             return state
         chain = qa_advanced
         chat_history = get_last_chat_message(state.get("chat_id", ""))
         summary_history = state.get("summary", "")
-        print(summary_history)
+        # print(summary_history)
         if chat_history:
             question = chat_history.get("question", "")
             answer = chat_history.get("answer", "")
@@ -403,7 +429,7 @@ def summary(state: AgentState):
         for attempt in range(2):
             try:
                 response = llm.invoke([HumanMessage(content=message)])
-                state["summary"] = response
+                state["summary"] = extract_sql_from_response(response)
 
                 update_chat_summary(state["chat_id"], state["summary"])
                 return state
@@ -414,7 +440,7 @@ def summary(state: AgentState):
                 traceback.print_exc()
                 print("Error during get_llm_object:", repr(e))
             time.sleep(3)
-
+        update_chat_lnode(chat_id=state["chat_id"], lnode="summary")
         # If both attempts fail
         return state
     except Exception as e:

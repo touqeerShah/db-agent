@@ -6,6 +6,7 @@ from langgraph.checkpoint.memory import MemorySaver
 import time
 import json
 from datetime import datetime
+
 # from langgraph.checkpoint.sqlite import SqliteSaver
 from asgiref.sync import sync_to_async
 
@@ -63,7 +64,6 @@ class Agent:
             },
         )
 
-
         # formate_answer → verifier → stream
         builder.add_edge("query_database", "respond_general")
         builder.add_edge("respond_general", "stream")
@@ -80,22 +80,21 @@ class Agent:
         memory = MemorySaver()
 
         self.graph = builder.compile(
-                checkpointer=memory,
-                # interrupt_after=[
-                #     "classify_user_intent",
-                #     "query_database",
-                #     "index",
-                #     "scrape_data",
-                #     "transform_code_instruction",
-                #     "supervisor",
-                # ],
-                # debug=True,
-            )
+            checkpointer=memory,
+            # interrupt_after=[
+            #     "classify_user_intent",
+            #     "query_database",
+            #     "index",
+            #     "scrape_data",
+            #     "transform_code_instruction",
+            #     "supervisor",
+            # ],
+            # debug=True,
+        )
 
         self.graph = builder.compile()
         self.model = model
         # self.collections.append(collection_name)
-
 
     async def report_stream(self, state: AgentState, chat_id: str):
         try:
@@ -120,10 +119,11 @@ class Agent:
                 elif isinstance(obj, tuple):
                     return tuple(make_json_serializable(item) for item in obj)
                 return obj
+
             async for event, chunk in self.graph.astream(
                 state, thread, stream_mode=["updates"]
             ):
-                print(f">>>>>>>>>>>>>>>>{chunk}<<<<<<<<<<<<<<<<<<")
+                # print(f">>>>>>>>>>>>>>>>{chunk}<<<<<<<<<<<<<<<<<<")
                 serializable_chunk = make_json_serializable(chunk)
                 s_serializable = DjangoJSONEncoder().encode(serializable_chunk)
                 # Parse back into a JSON object to access fields
@@ -135,10 +135,12 @@ class Agent:
                 # Extract only the desired fields from query_data
                 response_data = {
                     "query": query_data["query"],
-                    "created_at": datetime.utcnow().isoformat()+ "Z",  # UTC timestamp in ISO format
-                    "intent_classification":query_data["intent_classification"],
-                    "sql_response":query_data["sql_response"],
+                    "created_at": datetime.utcnow().isoformat()
+                    + "Z",  # UTC timestamp in ISO format
+                    "intent_classification": query_data["intent_classification"],
+                    "sql_response": query_data["sql_response"],
                     "answer": query_data.get("answer", "No answer provided."),
+                    "lnode": query_data.get("lnode", "Processing."),
                 }
                 print("response_data:", response_data)
 
@@ -153,7 +155,9 @@ class Agent:
             self.message["status"] = "done"
             yield f'{{"message": {json.dumps(self.message)}}}\n'
         finally:
-            timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = datetime.fromtimestamp(time.time()).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             async_create_chat_message = sync_to_async(create_chat_message)
 
             try:

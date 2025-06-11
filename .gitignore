@@ -4,3 +4,4 @@ backend/VulnDefend/api/llm_agent/vectorstores
 backend/VulnDefend/api/migrations
 db/data
 backend/VulnDefend/db.sqlite3
+backend/VulnDefend/vectorstores/db

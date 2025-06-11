@@ -15,8 +15,8 @@ def create_chat(
             "title": question[:64],
         },
     )
-    if created:
-        ChatMessage.objects.create(chat=chat, question=question)
+    # if created:
+    #     ChatMessage.objects.create(chat=chat, question=question)
     return chat
 
 def create_chat_message(
@@ -35,10 +35,18 @@ def create_chat_message(
         sql_response=sql_response or {},
     )
 
+
 def update_chat_summary(chat_id: str, summary: str) -> ChatMessage:
     chat = Chat.objects.get(chat_id=chat_id)
 
     chat.summary = summary
+    chat.save()
+    return chat
+
+def update_chat_lnode(chat_id: str, lnode: str) -> ChatMessage:
+    chat = Chat.objects.get(chat_id=chat_id)
+
+    chat.lnode = lnode
     chat.save()
     return chat
 
