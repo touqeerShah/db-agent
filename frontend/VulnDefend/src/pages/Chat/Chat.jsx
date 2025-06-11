@@ -257,9 +257,7 @@ const startStream = async () => {
                       question: parsedMessage.response.question,
                       created_at: new Date().toISOString(),
                       lnode: parsedMessage.response.lnode,
-                      urls: parsedMessage.response.urls,
-                      code: parsedMessage.response.code,
-                      code_instruction: parsedMessage.response.code_instruction
+                      intent_classification: parsedMessage.response.intent_classification,
                     }
                   }
                 ];

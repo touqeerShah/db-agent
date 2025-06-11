@@ -18,12 +18,13 @@ const stepIcons = {
   query_database: <FontAwesomeIcon icon={faDatabase} />, // Scraping Data
   respond_general: <FontAwesomeIcon icon={faSearch} />, // Processing Query
   stream: <FontAwesomeIcon icon={faCheckCircle} />, // Validating Code Existence
-
+  summary: <FontAwesomeIcon icon={faCheckCircle} />, // Validating Code Existence
 };
 const humanReadableStep = {
   classify_user_intent: "Classify User Intent",
   query_database: "Query Database",
   respond_general: "Respond General",
+  summary: "Summary",
   stream: "Stream",
   default: "Processing...",
 };
@@ -93,9 +94,9 @@ const renderMessageContent = () => {
   // If message starts with a Markdown code block like ```markdown ... ```
   const markdownCodeBlockMatch = message.match(/```(?:markdown)?\s*([\s\S]*?)```/);
   console.log("markdownCodeBlockMatch",markdownCodeBlockMatch)
-  if (markdownCodeBlockMatch) {
+  if (message) {
     // Extract and render the inner Markdown content
-    const markdownContent = markdownCodeBlockMatch[1];
+    // const markdownContent = markdownCodeBlockMatch[1];
 
     return (
       <ReactMarkdown
@@ -105,10 +106,10 @@ const renderMessageContent = () => {
           code({ node, inline, className, children, ...props }) {
             return !inline ? (
               <pre className="bg-gray-800 text-white p-2 rounded-md overflow-x-auto">
-                <code className={className} {...props}>{children}</code>
+                <code className={className} {...props}>{"= = "+children}</code>
               </pre>
             ) : (
-              <code className="bg-gray-200 px-1 rounded">{children}</code>
+              <code className="bg-gray-200 px-1 rounded"> {children}</code>
             );
           },
           a({ href, children }) {
@@ -125,7 +126,7 @@ const renderMessageContent = () => {
           },
         }}
       >
-        {markdownContent}
+        {message}
       </ReactMarkdown>
     );
   }

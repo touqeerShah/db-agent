@@ -402,7 +402,7 @@
 }
 
 .chat-response .chat-text {
-  background-color: #e3effd !important;
+  /* background-color: #e3effd !important; */
   color: black;
 }
 .chat-text-only {
@@ -487,7 +487,7 @@
 /* Add padding and margins for better spacing on smaller screens */
 @media (max-width: 768px) {
   .chat-message {
-    max-width: 100%; /* Increase width for smaller screens */
+    max-width: 100%; 
     padding: 10px; /* Add padding for smaller screens */
   }
 
